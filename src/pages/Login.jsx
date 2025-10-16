@@ -5,10 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 
-
-console.log(backendUrl);
-
-
 const Login = () => {
   const [state, setState] = useState('Sign Up');
   const [name, setName] = useState('');
