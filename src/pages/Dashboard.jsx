@@ -5,6 +5,9 @@ import BalanceCard from "../components/BalanceCard";
 import TransactionList from "../components/TransactionList";
 import SendMoneyForm from "../components/SendMoneyForm";
 import TopUpModal from "../components/TopUpModal";
+import { toast } from "react-toastify";
+import confetti from "canvas-confetti";
+
 
 export default function Dashboard() {
   const [user, setUser] = useState({ name: "", email: "", balance: 0, transactions: [] });
@@ -39,6 +42,44 @@ export default function Dashboard() {
     fetchUserData();
   }, [token]);
 
+  const boomConfetti = (x = 0.5, y = 0.6) => {
+  const duration = 1 * 1000;
+  const animationEnd = Date.now() + duration;
+  const defaults = {
+    startVelocity: 60,
+    spread: 360,
+    ticks: 60,
+    zIndex: 9999,
+    colors: ["#6366f1", "#a855f7", "#10b981", "#facc15"],
+  };
+
+  function randomInRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  const interval = setInterval(() => {
+    const timeLeft = animationEnd - Date.now();
+    if (timeLeft <= 0) {
+      return clearInterval(interval);
+    }
+
+    const particleCount = 200 * (timeLeft / duration);
+
+    // Two bursts from opposite sides 💥
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: { x: randomInRange(x - 0.2, x - 0.1), y },
+    });
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: { x: randomInRange(x + 0.1, x + 0.2), y },
+    });
+  }, 200);
+};
+
+
   const handleSendMoney = async (e) => {
     e.preventDefault();
     if (!recipientId || !amount) return alert("Select recipient and enter amount");
@@ -48,13 +89,14 @@ export default function Dashboard() {
         { receiverId: recipientId, amount: parseFloat(amount) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert(response.data.message);
+      toast.success(response.data.message);
+      boomConfetti();
       const updatedUser = await axios.get("http://localhost:8080/api/users/me", { headers: { Authorization: `Bearer ${token}` } });
       setUser(updatedUser.data);
       setAmount("");
       setRecipientId("");
     } catch (err) {
-      alert(err.response?.data || "Transfer failed");
+      toast.error(err.response?.data || "Transfer failed");
     }
   };
 
@@ -77,10 +119,12 @@ export default function Dashboard() {
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <BalanceCard title="Account Balance" value={`₹${user.balance}`} subValue="+ ₹0 this month" color="text-emerald-400" />
-        <BalanceCard title="Total Transactions" value={user.transactions.length} subValue="0 new this week" />
+        <BalanceCard title="Total Transactions" value={user.name.length} subValue="0 new this week" />
         <BalanceCard
           title="Monthly Spend"
-          value={`₹${user.transactions.filter(t => t.amount < 0).reduce((acc, t) => acc + Math.abs(t.amount), 0)}`}
+          // value={`₹${user.transactions.filter(t => t.amount < 0).reduce((acc, t) => acc + Math.abs(t.amount), 0)}`}
+          value={`₹${60}`}
+          
           subValue="-0% from last month"
           color="text-rose-400"
         />

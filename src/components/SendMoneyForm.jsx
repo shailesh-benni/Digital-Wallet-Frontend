@@ -1,4 +1,3 @@
-// components/SendMoneyForm.jsx
 import React from "react";
 
 const SendMoneyForm = ({ allUsers, recipientId, setRecipientId, amount, setAmount, handleSendMoney }) => (

@@ -1,4 +1,3 @@
-// components/TransactionList.jsx
 import React from "react";
 
 const TransactionList = ({ transactions = [] }) => (

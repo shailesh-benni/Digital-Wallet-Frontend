@@ -1,25 +1,25 @@
-// components/TopUpModal.jsx
 import React, { useState } from "react";
 import Modal from "./Modal";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const TopUpModal = ({ isOpen, onClose, token, setUser }) => {
   const [topUpAmount, setTopUpAmount] = useState("");
 
   const handleTopUp = async () => {
-    if (!topUpAmount || topUpAmount <= 0) return alert("Enter a valid amount");
+    if (!topUpAmount || topUpAmount <= 0) return toast.error("Enter a valid amount");
     try {
       const response = await axios.post(
         "http://localhost:8080/api/users/me/load",
         { amount: parseFloat(topUpAmount) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert(response.data.message);
+      toast.success(response.data.message);
       setUser(prev => ({ ...prev, balance: response.data.balance }));
       setTopUpAmount("");
       onClose();
     } catch (err) {
-      alert(err.response?.data || "Top up failed");
+      toast.error(err.response?.data || "Top up failed");
     }
   };
 

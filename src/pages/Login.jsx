@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { assets } from '../assets/assets';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 
-const backendUrl =  import.meta.env.VITE_SPRING_URL;
+
 console.log(backendUrl);
 
 
@@ -16,7 +17,7 @@ const Login = () => {
   const navigate = useNavigate();
   
   const loginUser = async (email, password) => {
-    const response = await axios.post(backendUrl+'auth/login', { email, password });
+    const response = await axios.post('http://localhost:8080/api/auth/login', { email, password });
     return response.data;
   };
 
@@ -30,7 +31,7 @@ const Login = () => {
     try {
       if (state === 'Sign Up') {
         await signupUser(name, email, password);
-        alert('Signup successful! Please log in.');
+        toast.success('Signup successful! Please log in.');
         setState('Log In');
       } else {
         const data = await loginUser(email, password);
@@ -40,7 +41,7 @@ const Login = () => {
         navigate('/dashboard');
       }
     } catch (err) {
-      alert(err.message || 'Error occurred');
+      toast.error(err.message || 'Error occurred');
     }
   };
 
