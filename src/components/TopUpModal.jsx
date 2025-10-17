@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import Modal from "./Modal"; // Make sure you have this Modal component
+import Modal from "./Modal";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 const TopUpModal = ({ isOpen, onClose, token, setUser }) => {
   const [topUpAmount, setTopUpAmount] = useState("");
 
-  // Use environment variable for backend URL
 const API_URL = import.meta.env.MODE === 'development'
   ? import.meta.env.VITE_DEV_API_URL
   : import.meta.env.VITE_PROD_API_URL;
@@ -18,7 +17,7 @@ console.log("Using backend:", API_URL);
 
     try {
       const response = await axios.post(
-        `${API_URL}/users/me/load`, // ✅ dynamic URL
+        `${API_URL}/users/me/load`, 
         { amount: parseFloat(topUpAmount) },
         {
           headers: {

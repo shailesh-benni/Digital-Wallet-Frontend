@@ -7,6 +7,7 @@ import SendMoneyForm from "../components/SendMoneyForm";
 import TopUpModal from "../components/TopUpModal";
 import { toast } from "react-toastify";
 import confetti from "canvas-confetti";
+import TransactionModal from "../components/TransactionModal";
 
 export default function Dashboard() {
   const [user, setUser] = useState({ name: "", email: "", balance: 0, transactions: [] });
@@ -14,6 +15,8 @@ export default function Dashboard() {
   const [recipientId, setRecipientId] = useState("");
   const [amount, setAmount] = useState("");
   const [isTopUpOpen, setIsTopUpOpen] = useState(false);
+const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+
 
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
@@ -24,7 +27,6 @@ const API_URL = import.meta.env.MODE === 'development'
 console.log("Using backend:", API_URL);
 
 
-  // Fetch all users
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -87,7 +89,6 @@ console.log("Using backend:", API_URL);
     }, 200);
   };
 
-  // Handle sending money
   const handleSendMoney = async (e) => {
     e.preventDefault();
     if (!recipientId || !amount) return toast.error("Select recipient and enter amount");
@@ -100,9 +101,7 @@ console.log("Using backend:", API_URL);
       );
 
       toast.success(response.data.message);
-      boomConfetti();
 
-      // Update user balance
       const updatedUser = await axios.get(`${API_URL}/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -139,14 +138,28 @@ console.log("Using backend:", API_URL);
         </div>
       </header>
 
-      <TopUpModal isOpen={isTopUpOpen} onClose={() => setIsTopUpOpen(false)} token={token} setUser={setUser} />
+      <TopUpModal
+  isOpen={isTopUpOpen}
+  onClose={() => setIsTopUpOpen(false)}
+  token={token}
+  setUser={setUser}
+/>
+
+<TransactionModal
+  isOpen={isTransactionModalOpen}
+  onClose={() => setIsTransactionModalOpen(false)}
+  transactions={user.transactions}
+/>
+
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <BalanceCard title="Account Balance" value={`₹${user.balance}`} subValue="+ ₹0 this month" color="text-emerald-400" />
         <BalanceCard title="Total Transactions" value={user.transactions.length} subValue="0 new this week" />
         <BalanceCard
           title="Monthly Spend"
-          value={`₹${60}`}
+          value={`₹${user.transactions
+              .filter((t) => t.amount < 0)
+              .reduce((acc, t) => acc + Math.abs(t.amount), 0)}`}
           subValue="-0% from last month"
           color="text-rose-400"
         />
@@ -156,7 +169,13 @@ console.log("Using backend:", API_URL);
         <div className="lg:col-span-2 bg-slate-900 rounded-xl p-6 shadow-lg border border-slate-800">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-indigo-400">Recent Transactions</h3>
-            <button className="text-sm text-indigo-400 hover:underline">View All</button>
+            <button
+  onClick={() => setIsTransactionModalOpen(true)}
+  className="text-sm text-indigo-400 hover:underline cursor-pointer"
+>
+  View All
+</button>
+
           </div>
           <TransactionList transactions={user.transactions} />
         </div>
@@ -172,6 +191,8 @@ console.log("Using backend:", API_URL);
             handleSendMoney={handleSendMoney}
           />
         </div>
+
+        
       </section>
 
       <footer className="text-center text-slate-500 text-sm mt-8">
